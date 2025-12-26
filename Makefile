@@ -4,7 +4,7 @@ CFLAGS = -Wall -Wextra -g -std=c99
 
 TARGET = skiplist_test
 
-SRCS = skiplist_test.c skiplist.c
+SRCS = skiplist_test.c skiplist.c str.c
 
 OBJS = $(SRCS:.c=.o)
 

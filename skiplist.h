@@ -6,14 +6,16 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include "str.h"
+
 typedef struct SkipListNode {
-  int key;
+  Str key;
+  Str value;
   int height;
   struct SkipListNode* next[1];
 } SkipListNode;
 
-SkipListNode*
-new_skip_list_node(int key, int height);
+#define next_skip_list_node(node) (node->next[0])
 
 typedef struct SkipList {
   SkipListNode* head;
@@ -23,20 +25,19 @@ typedef struct SkipList {
 SkipList*
 new_skip_list();
 
-SkipListNode*
-skip_list_begin(SkipList* skip_list);
+#define skip_list_begin(skip_list) (skip_list->head->next[0])
 
 SkipListNode*
-skip_list_lower_bound(SkipList* skip_list, int key);
-
-SkipListNode*
-next_skip_list_node(SkipListNode* node);
+skip_list_lower_bound(SkipList* skip_list, Str key);
 
 void
-skip_list_insert(SkipList* skip_list, int key);
+skip_list_insert(SkipList* skip_list, Str key, Str value);
 
 int
-skip_list_erase(SkipList* skip_list, int key);
+skip_list_erase(SkipList* skip_list, Str key);
 
 void
-skip_list_release(SkipList* skip_list);
+skip_list_clear(SkipList* skip_list);
+
+void
+skip_list_free(SkipList* skip_list);

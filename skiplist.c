@@ -3,35 +3,43 @@
 static int MAX_HEIGHT = 12;
 
 SkipListNode*
-new_skip_list_node(int key, int height) {
+new_skip_list_node(Str key, Str value, int height) {
   assert(height <= MAX_HEIGHT);
 
   SkipListNode* node = malloc(sizeof(SkipListNode) + (height - 1) * sizeof(SkipListNode*));
-  node->key = key;
+  node->key = str_dup(key);
+  node->value = str_dup(value);
   node->height = height;
+
+  for (int h = 0; h < height; h++) {
+    node->next[h] = NULL;
+  }
+
   return node;
+}
+
+void
+skip_list_node_free(SkipListNode* node) {
+  str_free(node->key);
+  str_free(node->value);
+  free(node);
 }
 
 SkipList*
 new_skip_list() {
   SkipList* skip_list = malloc(sizeof(SkipList));
   skip_list->max_height = 1;
-  skip_list->head = new_skip_list_node(0, MAX_HEIGHT);
+  skip_list->head = new_skip_list_node(new_empty_str(), new_empty_str(), MAX_HEIGHT);
   return skip_list;
 };
 
 SkipListNode*
-skip_list_begin(SkipList* skip_list) {
-  return skip_list->head->next[0];
-}
-
-SkipListNode*
-find_node(SkipList* skip_list, int key, SkipListNode** prev_nodes, int prev_nodes_height) {
+find_node(SkipList* skip_list, Str key, SkipListNode** prev_nodes, int prev_nodes_height) {
   SkipListNode* node = skip_list->head;
   int height = skip_list->max_height - 1;
   while (true) {
     SkipListNode* next = node->next[height];
-    if (next && key > next->key) {
+    if (next && str_compare(key, next->key) == 1) {
       node = next;
       continue;
     }
@@ -48,13 +56,8 @@ find_node(SkipList* skip_list, int key, SkipListNode** prev_nodes, int prev_node
 }
 
 SkipListNode*
-skip_list_lower_bound(SkipList* skip_list, int key) {
+skip_list_lower_bound(SkipList* skip_list, Str key) {
   return find_node(skip_list, key, NULL, 0);
-}
-
-SkipListNode*
-next_skip_list_node(SkipListNode* node) {
-  return node->next[0];
 }
 
 int
@@ -71,14 +74,20 @@ get_random_height() {
 }
 
 void
-skip_list_insert(SkipList* skip_list, int key) {
+skip_list_insert(SkipList* skip_list, Str key, Str value) {
   int height = get_random_height();
   assert(height <= MAX_HEIGHT);
 
-  SkipListNode* node = new_skip_list_node(key, height);
+  SkipListNode* node = new_skip_list_node(key, value, height);
 
   SkipListNode* x = find_node(skip_list, key, node->next, node->height);
-  assert(x ? x->key >= key : true);
+  assert(x ? str_compare(x->key, key) != -1 : true);
+
+  if (x && str_compare(key, x->key) == 0) {
+    str_copy(&x->value, value);
+    skip_list_node_free(node);
+    return;
+  }
 
   if (height > skip_list->max_height) {
     for (int h = skip_list->max_height; h < height; h++) {
@@ -106,14 +115,12 @@ fix_max_height(SkipList* skip_list) {
 }
 
 int
-skip_list_erase(SkipList* skip_list, int key) {
+skip_list_erase(SkipList* skip_list, Str key) {
   SkipListNode* prev_nodes[MAX_HEIGHT];
   SkipListNode* x = find_node(skip_list, key, prev_nodes, MAX_HEIGHT);
-  if (!x || x->key != key) {
+  if (!x || str_compare(x->key, key) != 0) {
     return 0;
   }
-
-  assert(x->key == key);
 
   for (int h = 0; h < x->height; h++) {
     prev_nodes[h]->next[h] = x->next[h];
@@ -123,17 +130,17 @@ skip_list_erase(SkipList* skip_list, int key) {
     fix_max_height(skip_list);
   }
 
-  free(x);
+  skip_list_node_free(x);
 
   return 1;
 }
 
 void
-skip_list_release(SkipList* skip_list) {
+skip_list_clear(SkipList* skip_list) {
   SkipListNode* node = skip_list->head->next[0];
   while (node) {
     SkipListNode* next = node->next[0];
-    free(node);
+    skip_list_node_free(node);
     node = next;
   }
 
@@ -142,4 +149,10 @@ skip_list_release(SkipList* skip_list) {
   }
 
   skip_list->max_height = 1;
+}
+
+void
+skip_list_free(SkipList* skip_list) {
+  skip_list_clear(skip_list);
+  skip_list_node_free(skip_list->head);
 }
