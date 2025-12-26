@@ -1,10 +1,12 @@
+#include <stdint.h>
+
 typedef struct Str {
-  int size;
+  uint16_t size;
   char* data;
 } Str;
 
 Str
-new_str(int size);
+new_str(uint16_t size);
 
 Str
 new_empty_str();

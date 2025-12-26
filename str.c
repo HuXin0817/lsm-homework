@@ -7,9 +7,7 @@
 #include "util.h"
 
 Str
-new_str(int size) {
-  assert(size >= 0);
-
+new_str(uint16_t size) {
   Str str;
   str.size = size;
 
@@ -57,9 +55,9 @@ str_copy(Str* str, const Str from) {
 
 int
 str_compare(const Str a, const Str b) {
-  int min_size = min(a.size, b.size);
+  uint16_t min_size = min(a.size, b.size);
 
-  for (int i = 0; i < min_size; i++) {
+  for (uint16_t i = 0; i < min_size; i++) {
     if (a.data[i] < b.data[i]) {
       return -1;
     }
