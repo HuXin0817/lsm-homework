@@ -19,20 +19,6 @@ SkipList *new_skip_list() {
   return skip_list;
 };
 
-void print_skip_list(SkipList *skip_list) {
-  for (int h = skip_list->max_height - 1; h >= 0; h--) {
-    SkipListNode *head = skip_list->head->next[h];
-    while (head) {
-      printf("%d", head->key);
-      head = head->next[h];
-      if (head) {
-        printf(" -> ");
-      }
-    }
-    printf("\n");
-  }
-}
-
 SkipListNode *skip_list_begin(SkipList *skip_list) {
   return skip_list->head->next[0];
 }

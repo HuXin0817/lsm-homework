@@ -21,8 +21,6 @@ typedef struct SkipList {
 
 SkipList *new_skip_list();
 
-void print_skip_list(SkipList *skip_list);
-
 SkipListNode *skip_list_begin(SkipList *skip_list);
 
 SkipListNode *skip_list_lower_bound(SkipList *skip_list, int key);
